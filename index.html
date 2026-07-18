@@ -195,6 +195,15 @@
       const data = await response.json();
       pensando.remove();
 
+      if (!response.ok || data.error) {
+        // Muestra el error real que devuelve Google, para poder diagnosticar
+        const detalle = data?.error?.message || `HTTP ${response.status}`;
+        addMessage("⚠️ ERROR API: " + detalle, "bot");
+        console.error(data);
+        sendBtn.disabled = false;
+        return;
+      }
+
       const respuesta =
         data?.candidates?.[0]?.content?.parts?.[0]?.text ||
         "Disculpa, no pude procesar tu pregunta. Intenta de nuevo.";
@@ -202,7 +211,7 @@
       addMessage(respuesta, "bot");
     } catch (err) {
       pensando.remove();
-      addMessage("Hubo un error de conexión. Intenta más tarde.", "bot");
+      addMessage("⚠️ ERROR DE RED: " + err.message, "bot");
       console.error(err);
     }
 
