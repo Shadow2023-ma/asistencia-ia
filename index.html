@@ -137,9 +137,9 @@
 </main>
 
 <script>
-  // ⚠️ Reemplaza esto con tu API Key de Gemini (ver instrucciones abajo)
-  const ";
-  const MODEL = "gemini-2.0-flash";
+  // ⚠️ Reemplaza esto con tu API Key de Groq (ver instrucciones abajo)
+  const API_KEY = "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";
+  const MODEL = "llama-3.3-70b-versatile";
 
   const messagesDiv = document.getElementById("messages");
   const input = document.getElementById("userInput");
@@ -176,17 +176,18 @@
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
+        "https://api.groq.com/openai/v1/chat/completions",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API_KEY}`
+          },
           body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  { text: CONTEXTO + "\n\nPregunta del cliente: " + texto }
-                ]
-              }
+            model: MODEL,
+            messages: [
+              { role: "system", content: CONTEXTO },
+              { role: "user", content: texto }
             ]
           })
         }
@@ -196,7 +197,6 @@
       pensando.remove();
 
       if (!response.ok || data.error) {
-        // Muestra el error real que devuelve Google, para poder diagnosticar
         const detalle = data?.error?.message || `HTTP ${response.status}`;
         addMessage("⚠️ ERROR API: " + detalle, "bot");
         console.error(data);
@@ -205,7 +205,7 @@
       }
 
       const respuesta =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        data?.choices?.[0]?.message?.content ||
         "Disculpa, no pude procesar tu pregunta. Intenta de nuevo.";
 
       addMessage(respuesta, "bot");
